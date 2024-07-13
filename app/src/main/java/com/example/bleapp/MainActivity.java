@@ -2,181 +2,139 @@ package com.example.bleapp;
 
 import android.Manifest;
 import android.bluetooth.BluetoothAdapter;
-import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothGatt;
-import android.bluetooth.BluetoothGattCallback;
-import android.bluetooth.BluetoothGattCharacteristic;
-import android.bluetooth.BluetoothGattDescriptor;
-import android.bluetooth.BluetoothGattService;
-import android.bluetooth.BluetoothProfile;
-import android.bluetooth.le.BluetoothLeScanner;
-import android.bluetooth.le.ScanCallback;
-import android.bluetooth.le.ScanResult;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
-import java.util.ArrayList;
+import com.clj.fastble.BleManager;
+import com.clj.fastble.callback.BleGattCallback;
+import com.clj.fastble.callback.BleScanCallback;
+import com.clj.fastble.data.BleDevice;
+import com.clj.fastble.exception.BleException;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.util.List;
-import java.util.UUID;
 
 public class MainActivity extends AppCompatActivity {
 
     private static final int REQUEST_ENABLE_BT = 1;
-    private static final int REQUEST_FINE_LOCATION = 2;
-    private static final UUID SERVICE_UUID = UUID.fromString("00000180-0000-1000-8000-00805f9b34fb");
-    private static final UUID CHARACTERISTIC_UUID = UUID.fromString("0000FEF4-0000-1000-8000-00805f9b34fb");
-    private static final UUID DESCRIPTOR_UUID = UUID.fromString("0000DEAD-0000-1000-8000-00805f9b34fb");
+    private static final int REQUEST_LOCATION_PERMISSION = 2;
 
-    private BluetoothAdapter bluetoothAdapter;
-    private BluetoothLeScanner bluetoothLeScanner;
-    private ScanCallback scanCallback;
-    private List<BluetoothDevice> deviceList;
-    private ArrayAdapter<BluetoothDevice> deviceListAdapter;
     private TextView statusTextView;
-    private BluetoothGatt bluetoothGatt;
+    private RecyclerView recyclerView;
+    private Button scanButton;
+    private BleDeviceAdapter adapter;
+    private TextView label1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        Button btnScan = findViewById(R.id.btn_scan);
-        ListView listViewDevices = findViewById(R.id.listViewDevices);
         statusTextView = findViewById(R.id.statusTextView);
+        recyclerView = findViewById(R.id.recyclerView);
+        scanButton = findViewById(R.id.scanButton);
+        label1 = findViewById(R.id.label1);
 
-        deviceList = new ArrayList<>();
-        deviceListAdapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, deviceList);
-        listViewDevices.setAdapter(deviceListAdapter);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        adapter = new BleDeviceAdapter();
+        recyclerView.setAdapter(adapter);
 
-        bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-        bluetoothLeScanner = bluetoothAdapter.getBluetoothLeScanner();
+        BleManager.getInstance().init(getApplication());
 
-        btnScan.setOnClickListener(v -> startScan());
-
-        listViewDevices.setOnItemClickListener((parent, view, position, id) -> {
-            BluetoothDevice device = deviceList.get(position);
-            connectToDevice(device);
+        scanButton.setOnClickListener(v -> {
+            if (checkPermissions()) {
+                startScan();
+            }
         });
 
-        checkPermissions();
+        adapter.setOnItemClickListener(this::connectToDevice);
     }
 
-    private void checkPermissions() {
-        if (bluetoothAdapter == null || !bluetoothAdapter.isEnabled()) {
-            Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-            startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
+    private boolean checkPermissions() {
+        if (!BleManager.getInstance().isBlueEnable()) {
+            BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+            if (bluetoothAdapter != null && !bluetoothAdapter.isEnabled()) {
+                startActivityForResult(new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE), REQUEST_ENABLE_BT);
+                return false;
+            }
         }
 
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, REQUEST_FINE_LOCATION);
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, REQUEST_LOCATION_PERMISSION);
+            return false;
         }
+
+        return true;
     }
 
     private void startScan() {
-        statusTextView.setText("Status: Scanning");
-        deviceList.clear();
-        deviceListAdapter.notifyDataSetChanged();
-
-        scanCallback = new ScanCallback() {
+        BleManager.getInstance().scan(new BleScanCallback() {
             @Override
-            public void onScanResult(int callbackType, ScanResult result) {
-                super.onScanResult(callbackType, result);
-                BluetoothDevice device = result.getDevice();
-                if (!deviceList.contains(device)) {
-                    deviceList.add(device);
-                    deviceListAdapter.notifyDataSetChanged();
-                }
+            public void onScanStarted(boolean success) {
+                scanButton.setEnabled(false);
+                statusTextView.setText("Scanning...");
             }
 
             @Override
-            public void onScanFailed(int errorCode) {
-                super.onScanFailed(errorCode);
-                statusTextView.setText("Status: Scan Failed");
-            }
-        };
-
-        bluetoothLeScanner.startScan(scanCallback);
-    }
-
-    private void stopScan() {
-        bluetoothLeScanner.stopScan(scanCallback);
-    }
-
-    private void connectToDevice(BluetoothDevice device) {
-        stopScan();
-        statusTextView.setText("Status: Connecting to " + device.getName());
-
-        bluetoothGatt = device.connectGatt(this, false, new BluetoothGattCallback() {
-            @Override
-            public void onConnectionStateChange(BluetoothGatt gatt, int status, int newState) {
-                super.onConnectionStateChange(gatt, status, newState);
-                if (newState == BluetoothProfile.STATE_CONNECTED) {
-                    runOnUiThread(() -> statusTextView.setText("Status: Connected"));
-                    gatt.discoverServices();
-                } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
-                    runOnUiThread(() -> statusTextView.setText("Status: Disconnected"));
-                    // Handle reconnection or other logic here
-                }
+            public void onScanning(BleDevice bleDevice) {
+                adapter.addDevice(bleDevice);
             }
 
             @Override
-            public void onServicesDiscovered(BluetoothGatt gatt, int status) {
-                super.onServicesDiscovered(gatt, status);
-                if (status == BluetoothGatt.GATT_SUCCESS) {
-                    BluetoothGattService service = gatt.getService(SERVICE_UUID);
-                    if (service != null) {
-                        BluetoothGattCharacteristic characteristic = service.getCharacteristic(CHARACTERISTIC_UUID);
-                        if (characteristic != null) {
-                            gatt.setCharacteristicNotification(characteristic, true);
-
-                            BluetoothGattDescriptor descriptor = characteristic.getDescriptor(DESCRIPTOR_UUID);
-                            if (descriptor != null) {
-                                descriptor.setValue(BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE);
-                                gatt.writeDescriptor(descriptor);
-                            }
-                        }
-                    }
-                }
-            }
-
-            @Override
-            public void onCharacteristicChanged(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic) {
-                super.onCharacteristicChanged(gatt, characteristic);
-                byte[] data = characteristic.getValue();
-                runOnUiThread(() -> updateTextView(data));
+            public void onScanFinished(List<BleDevice> scanResultList) {
+                scanButton.setEnabled(true);
+                statusTextView.setText("Scan finished.");
             }
         });
     }
 
-    private void updateTextView(byte[] data) {
-        String dataString = new String(data);
-        statusTextView.setText("Data: " + dataString);
+    private void connectToDevice(BleDevice device) {
+        BleManager.getInstance().connect(device, new BleGattCallback() {
+            @Override
+            public void onStartConnect() {
+                statusTextView.setText("Connecting...");
+            }
 
-        // Update specific TextViews with parsed data
-        // Example:
-        // tempValueTextView.setText(parsedTemperature);
-        // humValueTextView.setText(parsedHumidity);
+            @Override
+            public void onConnectFail(BleDevice bleDevice, BleException exception) {
+                statusTextView.setText("Connect fail: " + exception.toString());
+            }
+
+            @Override
+            public void onConnectSuccess(BleDevice bleDevice, BluetoothGatt gatt, int status) {
+                statusTextView.setText("Connected");
+                // Add code to handle data reception here
+            }
+
+            @Override
+            public void onDisConnected(boolean isActiveDisConnected, BleDevice device, BluetoothGatt gatt, int status) {
+                statusTextView.setText("Disconnected");
+            }
+        });
     }
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if (requestCode == REQUEST_FINE_LOCATION) {
-            if (grantResults.length > 0 && grantResults[0] != PackageManager.PERMISSION_GRANTED) {
-                Toast.makeText(this, "Location permission is required for BLE scanning", Toast.LENGTH_SHORT).show();
-            } else {
+        if (requestCode == REQUEST_LOCATION_PERMISSION) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 startScan();
+            } else {
+                Toast.makeText(this, "Location permission denied", Toast.LENGTH_SHORT).show();
             }
         }
     }
@@ -185,20 +143,35 @@ public class MainActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == REQUEST_ENABLE_BT) {
-            if (resultCode != RESULT_OK) {
-                Toast.makeText(this, "Bluetooth must be enabled to use this app", Toast.LENGTH_SHORT).show();
-            } else {
+            if (resultCode == RESULT_OK) {
                 startScan();
+            } else {
+                Toast.makeText(this, "Bluetooth not enabled", Toast.LENGTH_SHORT).show();
             }
         }
     }
 
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        if (bluetoothGatt != null) {
-            bluetoothGatt.close();
-            bluetoothGatt = null;
+    // Method to update label1 with received JSON data
+    private void updateLabel1(String jsonData) {
+        try {
+            JSONObject jsonObject = new JSONObject(jsonData);
+            double temperature = jsonObject.getDouble("temperature");
+            double humidity = jsonObject.getDouble("humidity");
+            int no2 = jsonObject.getInt("no2");
+            int c2h5oh = jsonObject.getInt("c2h5oh");
+            int voc = jsonObject.getInt("voc");
+            int co = jsonObject.getInt("co");
+            int pm1 = jsonObject.getInt("pm1");
+            int pm2_5 = jsonObject.getInt("pm2_5");
+            int pm10 = jsonObject.getInt("pm10");
+
+            String labelText = String.format("Temperature: %.2f\nHumidity: %.2f\nNO2: %d\nC2H5OH: %d\nVOC: %d\nCO: %d\nPM1: %d\nPM2.5: %d\nPM10: %d",
+                    temperature, humidity, no2, c2h5oh, voc, co, pm1, pm2_5, pm10);
+
+            label1.setText(labelText);
+
+        } catch (JSONException e) {
+            e.printStackTrace();
         }
     }
 }

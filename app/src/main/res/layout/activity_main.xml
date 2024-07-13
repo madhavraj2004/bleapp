@@ -1,20 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:padding="16dp">
 
     <Button
-        android:id="@+id/btn_scan"
+        android:id="@+id/scanButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Scan" />
 
-    <ListView
-        android:id="@+id/listViewDevices"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerView"
+        android:layout_width="387dp"
+        android:layout_height="156dp" />
 
     <TextView
         android:id="@+id/statusTextView"
@@ -26,10 +27,10 @@
 
     <TextView
         android:id="@+id/label1"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Text for Label1"
-        android:layout_marginTop="8dp" />
+        android:layout_width="381dp"
+        android:layout_height="81dp"
+        android:layout_marginTop="8dp"
+        android:text="Text for Label1" />
 
     <TableLayout
         android:layout_width="match_parent"
