@@ -39,11 +39,13 @@ dependencies {
     implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.4.0'
     implementation 'androidx.navigation:navigation-fragment-ktx:2.4.0'
     implementation 'androidx.navigation:navigation-ui-ktx:2.4.0'
-    implementation 'androidx.recyclerview:recyclerview:1.2.1' // Updated androidx.recyclerview dependency
+    implementation 'androidx.recyclerview:recyclerview:1.2.1'
+    implementation libs.media3.common// Updated androidx.recyclerview dependency
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.1.3'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.4.0'
-
+    implementation 'com.polidea.rxandroidble3:rxandroidble:1.18.1'
+    implementation 'io.reactivex.rxjava3:rxandroid:3.0.1'
     implementation fileTree(dir: 'libs', include: ['*.jar'])
 
 

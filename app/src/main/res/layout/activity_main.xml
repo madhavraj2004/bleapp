@@ -1,36 +1,55 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:padding="16dp">
+    android:padding="16dp"
+    tools:context=".MainActivity">
+
+    <TextView
+        android:id="@+id/statusTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Status"
+        android:textSize="18sp"
+        android:textColor="@android:color/holo_red_light"
+        android:layout_marginBottom="16dp" />
 
     <Button
         android:id="@+id/scanButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Scan" />
+        android:text="Scan"
+        android:layout_marginBottom="8dp" />
+
+    <Button
+        android:id="@+id/connectButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Connect"
+        android:layout_marginBottom="8dp" />
+
+    <Button
+        android:id="@+id/readButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Read"
+        android:layout_marginBottom="16dp" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerView"
-        android:layout_width="387dp"
-        android:layout_height="156dp" />
-
-    <TextView
-        android:id="@+id/statusTextView"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Status: "
-        android:textColor="@android:color/holo_red_light"
-        android:layout_marginTop="16dp" />
+        android:layout_height="156dp"
+        android:layout_marginBottom="16dp" />
 
     <TextView
         android:id="@+id/label1"
-        android:layout_width="381dp"
-        android:layout_height="81dp"
-        android:layout_marginTop="8dp"
-        android:text="Text for Label1" />
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Text for Label1"
+        android:layout_marginTop="8dp" />
 
     <TableLayout
         android:layout_width="match_parent"
@@ -39,12 +58,12 @@
         android:layout_marginTop="8dp">
 
         <TableRow>
-            <TextView android:text="temp" android:padding="4dp"/>
+            <TextView android:text="Temperature" android:padding="4dp"/>
             <TextView android:id="@+id/temp_value" android:text="000" android:padding="4dp" android:background="@android:color/black" android:textColor="@android:color/holo_green_light"/>
         </TableRow>
 
         <TableRow>
-            <TextView android:text="hum." android:padding="4dp"/>
+            <TextView android:text="Humidity" android:padding="4dp"/>
             <TextView android:id="@+id/hum_value" android:text="000" android:padding="4dp" android:background="@android:color/black" android:textColor="@android:color/holo_green_light"/>
         </TableRow>
 
@@ -74,7 +93,7 @@
         </TableRow>
 
         <TableRow>
-            <TextView android:text="PM2" android:padding="4dp"/>
+            <TextView android:text="PM2.5" android:padding="4dp"/>
             <TextView android:id="@+id/pm2_value" android:text="000" android:padding="4dp" android:background="@android:color/black" android:textColor="@android:color/holo_green_light"/>
         </TableRow>
 
