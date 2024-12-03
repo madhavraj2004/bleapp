@@ -12,10 +12,20 @@
         android:id="@+id/statusTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+
         android:text="Status"
         android:textSize="18sp"
         android:textColor="@android:color/holo_red_light"
         android:layout_marginBottom="16dp" />
+
+
+    <TextView
+        android:id="@+id/valueView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="14sp"
+        android:padding="8dp"
+        android:text="Values" />
 
     <Button
         android:id="@+id/scanButton"
@@ -38,10 +48,18 @@
         android:text="Read"
         android:layout_marginBottom="16dp" />
 
+    <!-- New Export Button -->
+    <Button
+        android:id="@+id/exportButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Export CSV"
+        android:layout_marginBottom="16dp" />
+
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerView"
         android:layout_width="match_parent"
-        android:layout_height="156dp"
+        android:layout_height="8dp"
         android:layout_marginBottom="16dp" />
 
     <TextView
@@ -53,58 +71,135 @@
 
     <TableLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:stretchColumns="1"
-        android:layout_marginTop="8dp">
+        android:layout_height="300dp"
+        android:layout_marginTop="8dp"
+        android:stretchColumns="1">
 
         <TableRow>
-            <TextView android:text="Temperature" android:padding="4dp"/>
-            <TextView android:id="@+id/temp_value" android:text="000" android:padding="4dp" android:background="@android:color/black" android:textColor="@android:color/holo_green_light"/>
+
+            <TextView
+                android:padding="4dp"
+                android:text="Temperature" />
+
+            <TextView
+                android:id="@+id/temp_value"
+                android:background="@android:color/black"
+                android:padding="4dp"
+                android:text="000"
+                android:textColor="@android:color/holo_green_light" />
         </TableRow>
 
         <TableRow>
-            <TextView android:text="Humidity" android:padding="4dp"/>
-            <TextView android:id="@+id/hum_value" android:text="000" android:padding="4dp" android:background="@android:color/black" android:textColor="@android:color/holo_green_light"/>
+
+            <TextView
+                android:padding="4dp"
+                android:text="Humidity" />
+
+            <TextView
+                android:id="@+id/hum_value"
+                android:background="@android:color/black"
+                android:padding="4dp"
+                android:text="000"
+                android:textColor="@android:color/holo_green_light" />
         </TableRow>
 
         <TableRow>
-            <TextView android:text="NO2" android:padding="4dp"/>
-            <TextView android:id="@+id/no2_value" android:text="000" android:padding="4dp" android:background="@android:color/black" android:textColor="@android:color/holo_green_light"/>
+
+            <TextView
+                android:padding="4dp"
+                android:text="PRESS." />
+
+            <TextView
+                android:id="@+id/press_value"
+                android:background="@android:color/black"
+                android:padding="4dp"
+                android:text="000"
+                android:textColor="@android:color/holo_green_light" />
         </TableRow>
 
         <TableRow>
-            <TextView android:text="C2H5OH" android:padding="4dp"/>
-            <TextView android:id="@+id/c2h5oh_value" android:text="000" android:padding="4dp" android:background="@android:color/black" android:textColor="@android:color/holo_green_light"/>
+
+            <TextView
+                android:padding="4dp"
+                android:text="PM1" />
+
+            <TextView
+                android:id="@+id/pm1_value"
+                android:background="@android:color/black"
+                android:padding="4dp"
+                android:text="000"
+                android:textColor="@android:color/holo_green_light" />
         </TableRow>
 
         <TableRow>
-            <TextView android:text="VOC" android:padding="4dp"/>
-            <TextView android:id="@+id/voc_value" android:text="000" android:padding="4dp" android:background="@android:color/black" android:textColor="@android:color/holo_green_light"/>
+
+            <TextView
+                android:padding="4dp"
+                android:text="PM2.5" />
+
+            <TextView
+                android:id="@+id/pm2_value"
+                android:background="@android:color/black"
+                android:padding="4dp"
+                android:text="000"
+                android:textColor="@android:color/holo_green_light" />
         </TableRow>
 
         <TableRow>
-            <TextView android:text="CO" android:padding="4dp"/>
-            <TextView android:id="@+id/co_value" android:text="000" android:padding="4dp" android:background="@android:color/black" android:textColor="@android:color/holo_green_light"/>
+
+            <TextView
+                android:padding="4dp"
+                android:text="PM10" />
+
+            <TextView
+                android:id="@+id/pm10_value"
+                android:background="@android:color/black"
+                android:padding="4dp"
+                android:text="000"
+                android:textColor="@android:color/holo_green_light" />
         </TableRow>
 
         <TableRow>
-            <TextView android:text="PM1" android:padding="4dp"/>
-            <TextView android:id="@+id/pm1_value" android:text="000" android:padding="4dp" android:background="@android:color/black" android:textColor="@android:color/holo_green_light"/>
+
+            <TextView
+                android:padding="4dp"
+                android:text="CO" />
+
+            <TextView
+                android:id="@+id/co_value"
+                android:background="@android:color/black"
+                android:padding="4dp"
+                android:text="000"
+                android:textColor="@android:color/holo_green_light" />
         </TableRow>
 
         <TableRow>
-            <TextView android:text="PM2.5" android:padding="4dp"/>
-            <TextView android:id="@+id/pm2_value" android:text="000" android:padding="4dp" android:background="@android:color/black" android:textColor="@android:color/holo_green_light"/>
+
+            <TextView
+                android:padding="4dp"
+                android:text="CO2" />
+
+            <TextView
+                android:id="@+id/co2_value"
+                android:background="@android:color/black"
+                android:padding="4dp"
+                android:text="000"
+                android:textColor="@android:color/holo_green_light" />
         </TableRow>
 
         <TableRow>
-            <TextView android:text="PM10" android:padding="4dp"/>
-            <TextView android:id="@+id/pm10_value" android:text="000" android:padding="4dp" android:background="@android:color/black" android:textColor="@android:color/holo_green_light"/>
+
+            <TextView
+                android:padding="4dp"
+                android:text="VOC" />
+
+            <TextView
+                android:id="@+id/voc_value"
+                android:background="@android:color/black"
+                android:padding="4dp"
+                android:text="000"
+                android:textColor="@android:color/holo_green_light" />
         </TableRow>
 
-        <TableRow>
-            <TextView android:text="TEST" android:padding="4dp"/>
-            <TextView android:id="@+id/test_value" android:text="000" android:padding="4dp" android:background="@android:color/black" android:textColor="@android:color/holo_green_light"/>
-        </TableRow>
     </TableLayout>
 </LinearLayout>
